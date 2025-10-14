@@ -37,7 +37,7 @@ def register(req):
                 "Name": n,
                 "Email": e,
                 "Pswd": p,
-                "Role": "User",
+                "Role": r,
             })
 
             messages.success(req, "User Registered Successfully ✅ Now Login")
