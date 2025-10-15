@@ -48,7 +48,7 @@ def register(req):
             messages.error(req, f"Registration Failed: {error_msg}")
             return redirect("reg")
 
-    return render(req, "myapp/registration.html")
+    return render(req, "myapp/Register.html")
 
 
 def Login(req):
@@ -71,7 +71,7 @@ def Login(req):
         if res.status_code == 200:
             userinfo = res.json()
             req.session["email"] = userinfo.get("email")
-            return redirect("home")
+            return redirect("index")
         else:
             error = res.json().get("error", {}).get("message", "Message Not Found")
             print(error)
@@ -89,8 +89,38 @@ def home(request):
     email = request.session.get("email")
     if not email:                       # Agar user login nahi hai to redirect
         return redirect("log")
-    return render(request, "myapp/home.html", {"email": email})
+    return render(request, "myapp/index.html", {"email": email})
 
+
+def Index(request):
+    return render(request,"myapp/index.html")
+
+def About(request):
+    return render(request,"myapp/about.html")
+
+def Course(request):
+    return render(request,"myapp/course.html")
+
+
+def Contact(request):
+    if request.method == "POST":
+        n = request.POST.get("name")
+        e = request.POST.get("email")
+        s = request.POST.get("subject")
+        m = request.POST.get("message")
+
+        contact_data = {
+            "name": n,
+            "email": e,
+            "subject": s,
+            "message": m
+        }
+        db.collection("contacts").add(contact_data)
+
+        messages.success(request, "Your message has been sent successfully!")
+        return redirect("con")
+
+    return render(request, "myapp/contact.html")
 
 def logout_view(request):
     logout(request)            # ← user ka session clear ho jayega
