@@ -5,6 +5,8 @@ from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from Education.firebase_config import db
+from django.shortcuts import render
+from .scrapper import scrape_propakistani_blogs
 from django.contrib.auth import logout
 from django.views.decorators.cache import never_cache
 
@@ -121,6 +123,10 @@ def Contact(request):
         return redirect("con")
 
     return render(request, "myapp/contact.html")
+
+def blog_list(request):
+    blogs = scrape_propakistani_blogs()
+    return render(request, 'myapp/news.html', {'blogs': blogs})
 
 def logout_view(request):
     logout(request)            # ← user ka session clear ho jayega

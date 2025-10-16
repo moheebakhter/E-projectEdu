@@ -9,6 +9,7 @@ urlpatterns = [
     path("a", views.About, name="about"),
     path("c", views.Course, name="course"),
     path("con", views.Contact, name="con"),
+    path('new', views.blog_list, name='blog_list'),
     path('logout', views.logout_view, name='logout'),
 
 

@@ -1,0 +1,79 @@
+{% extends "master.html" %}
+
+{% block style %}
+<style>
+    body {
+        background-color: #f8f9fa;
+        padding: 30px;
+    }
+    .card {
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .card-header {
+        background-color: #0d6efd;
+        color: white;
+        font-weight: bold;
+        font-size: 1.2rem;
+        padding: 15px 20px;
+    }
+    .card-body {
+        padding: 20px;
+    }
+    .btn-primary {
+        background-color: #0d6efd;
+        border: none;
+    }
+    .btn-primary:hover {
+        background-color: #084298;
+    }
+</style>
+{% endblock %}
+
+{% block abc %}
+<!-- Header Start -->
+<div class="jumbotron jumbotron-fluid position-relative overlay-bottom" style="margin-bottom: 90px;">
+    <div class="container text-center my-5 py-5">
+        <h1 class="text-white mt-4 mb-4">Learn From Home</h1>
+        <h1 class="text-white display-1 mb-5">Education News</h1>
+        <div class="mx-auto mb-5" style="width: 100%; max-width: 600px;">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-outline-light bg-white text-body px-4 dropdown-toggle" type="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">Courses</button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="#">Courses 1</a>
+                        <a class="dropdown-item" href="#">Courses 2</a>
+                        <a class="dropdown-item" href="#">Courses 3</a>
+                    </div>
+                </div>
+                <input type="text" class="form-control border-light" style="padding: 30px 25px;" placeholder="Keyword">
+                <div class="input-group-append">
+                    <button class="btn btn-secondary px-4 px-lg-5">Search</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Header End -->
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4 fw-bold">ProPakistani Education Blogs</h1>
+
+    <div class="row">
+        {% for blog in blogs %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    {{ forloop.counter }}. {{ blog.title }}
+                </div>
+                <div class="card-body text-center">
+                    <a href="{{ blog.link }}" target="_blank" class="btn btn-primary">Open</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
