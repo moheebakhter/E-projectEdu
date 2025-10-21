@@ -9,6 +9,11 @@ from django.shortcuts import render
 from .scrapper import scrape_propakistani_blogs
 from django.contrib.auth import logout
 from django.views.decorators.cache import never_cache
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+import firebase_admin
+from firebase_admin import credentials, firestore
+import os
 
 
 def register(req):
@@ -132,3 +137,102 @@ def logout_view(request):
     logout(request)            # ← user ka session clear ho jayega
     request.session.flush()    # ← session puri tarah se clear
     return redirect('/l')
+
+if not firebase_admin._apps:
+    # expect serviceAccountKey.json in project root
+    cred_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'serviceAccountKey.json')
+    cred_path = os.path.abspath(cred_path)
+    if os.path.exists(cred_path):
+        cred = credentials.Certificate(cred_path)
+        firebase_admin.initialize_app(cred)
+    else:
+        # initialize default app (some firebase functions will error until key provided)
+        try:
+            firebase_admin.initialize_app()
+        except Exception:
+            pass
+
+# get firestore client if possible
+try:
+    db = firestore.client()
+except Exception:
+    db = None
+
+def home(request):
+    return render(request, 'myapp/home.html')
+
+# Students CRUD
+def students_list(request):
+    students = []
+    if db:
+        docs = db.collection('students').stream()
+        for d in docs:
+            s = d.to_dict(); s['id'] = d.id
+            students.append(s)
+    return render(request, 'myapp/students_list.html', {'students': students})
+
+def students_add(request):
+    if request.method == 'POST' and db:
+        data = {
+            'name': request.POST.get('name'),
+            'email': request.POST.get('email'),
+            'grade': request.POST.get('grade'),
+        }
+        db.collection('students').add(data)
+        return redirect('students_list')
+    return render(request, 'myapp/students_form.html', {'action': 'Add'})
+
+def students_edit(request, doc_id):
+    if not db:
+        return HttpResponse('Firestore not configured', status=500)
+    doc_ref = db.collection('students').document(doc_id)
+    doc = doc_ref.get()
+    if not doc.exists:
+        return HttpResponse('Not found', status=404)
+    if request.method == 'POST':
+        doc_ref.update({
+            'name': request.POST.get('name'),
+            'email': request.POST.get('email'),
+            'grade': request.POST.get('grade'),
+        })
+        return redirect('students_list')
+    student = doc.to_dict(); student['id'] = doc.id
+    return render(request, 'myapp/students_form.html', {'action': 'Edit', 'student': student})
+
+# Courses CRUD
+def courses_list(request):
+    courses = []
+    if db:
+        docs = db.collection('courses').stream()
+        for d in docs:
+            c = d.to_dict(); c['id'] = d.id
+            courses.append(c)
+    return render(request, 'myapp/courses_list.html', {'courses': courses})
+
+def courses_add(request):
+    if request.method == 'POST' and db:
+        data = {
+            'title': request.POST.get('title'),
+            'code': request.POST.get('code'),
+            'description': request.POST.get('description'),
+        }
+        db.collection('courses').add(data)
+        return redirect('courses_list')
+    return render(request, 'myapp/courses_form.html', {'action': 'Add'})
+
+def courses_edit(request, doc_id):
+    if not db:
+        return HttpResponse('Firestore not configured', status=500)
+    doc_ref = db.collection('courses').document(doc_id)
+    doc = doc_ref.get()
+    if not doc.exists:
+        return HttpResponse('Not found', status=404)
+    if request.method == 'POST':
+        doc_ref.update({
+            'title': request.POST.get('title'),
+            'code': request.POST.get('code'),
+            'description': request.POST.get('description'),
+        })
+        return redirect('courses_list')
+    course = doc.to_dict(); course['id'] = doc.id
+    return render(request, 'myapp/courses_form.html', {'action': 'Edit', 'course': course})

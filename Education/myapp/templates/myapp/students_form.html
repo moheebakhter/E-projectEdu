@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ action }} Student | Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <!-- Header -->
+  <header class="bg-indigo-600 text-white py-4 shadow-md">
+    <div class="container mx-auto flex justify-between items-center px-6">
+      <h1 class="text-2xl font-semibold">Education Admin Dashboard</h1>
+      <nav>
+        <a href="/" class="hover:underline px-3">Home</a>
+        <a href="/students/" class="hover:underline px-3 font-bold">Students</a>
+        <a href="/courses/" class="hover:underline px-3">Courses</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto mt-10 px-6">
+    <div class="bg-white rounded-2xl shadow-md p-8 max-w-2xl mx-auto">
+      <h2 class="text-2xl font-bold text-gray-700 mb-6">{{ action }} Student</h2>
+
+      <form method="post" class="space-y-5">{% csrf_token %}
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">Full Name</label>
+          <input name="name" value="{{ student.name|default:'' }}"
+                 class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                 placeholder="Enter student's full name">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">Email Address</label>
+          <input name="email" value="{{ student.email|default:'' }}"
+                 type="email"
+                 class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                 placeholder="example@email.com">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">Grade / Class</label>
+          <input name="grade" value="{{ student.grade|default:'' }}"
+                 class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                 placeholder="e.g. 10th, 12th, A+, etc.">
+        </div>
+
+        <div class="flex justify-between items-center mt-6">
+          <a href="/students/"
+             class="text-indigo-600 hover:underline font-medium">&larr; Back to Students</a>
+          <button type="submit"
+                  class="bg-indigo-600 text-white px-6 py-2 rounded-lg shadow hover:bg-indigo-700 transition">
+            {{ action }} Student
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-10 text-center text-gray-500 py-4">
+    &copy; {{ year|default:"2025" }} Education System Admin Panel
+  </footer>
+
+</body>
+</html>
