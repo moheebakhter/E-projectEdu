@@ -14,7 +14,11 @@ from django.http import HttpResponse
 import firebase_admin
 from firebase_admin import credentials, firestore
 import os
-
+import pandas as p
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
 def register(req):
     if req.method == "POST":
@@ -132,6 +136,65 @@ def Contact(request):
 def blog_list(request):
     blogs = scrape_propakistani_blogs()
     return render(request, 'myapp/news.html', {'blogs': blogs})
+
+
+def predict_view(request):
+    result = None
+
+    if request.method == "POST":
+        hours = float(request.POST.get("hours"))
+
+        # Load dataset
+        mydata = p.read_csv("Expanded_data_with_more_features.csv")
+        x = mydata[["WklyStudyHours"]]
+        y = mydata["WritingScore"]
+        x = x.dropna()
+        y = y.loc[x.index]
+
+        # Train model
+        model = LinearRegression()
+        model.fit(x, y)
+
+        # Predict
+        prediction = model.predict([[hours]])
+        result = round(prediction[0], 2)
+
+    return render(request, "myapp/predict.html", {"result": result})
+
+# 🔹 Train model once when the server starts
+df = p.read_csv("student_dropout_dataset.csv")
+
+x = df[["Attendance", "StudyHours", "ParentalSupport", "PreviousGrade"]]
+y = df["Dropout"]
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+
+model = LogisticRegression()
+model.fit(x_train, y_train)
+
+accuracy = round(accuracy_score(y_test, model.predict(x_test)), 3)
+print(f"✅ Dropout Model trained (Accuracy: {accuracy})")
+
+
+# 🔹 Django view for form and prediction
+def dropout_view(request):
+    result = None
+    if request.method == "POST":
+        attendance = float(request.POST.get("attendance"))
+        studyhours = float(request.POST.get("studyhours"))
+        parent = int(request.POST.get("parent"))
+        grade = float(request.POST.get("grade"))
+
+        # Prediction
+        user_data = [[attendance, studyhours, parent, grade]]
+        prediction = model.predict(user_data)[0]
+
+        if prediction == 1:
+            result = "⚠️ Highly chance of Dropout"
+        else:
+            result = "✅ Great! The student is on the right track and likely to complete studies."
+
+    return render(request, "myapp/dropout.html", {"result": result, "accuracy": accuracy})
 
 def logout_view(request):
     logout(request)            # ← user ka session clear ho jayega
