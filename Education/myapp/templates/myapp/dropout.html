@@ -1,0 +1,50 @@
+{% extends "master.html" %}
+
+{% block abc %}
+<div style="
+  font-family: Arial, sans-serif;
+  background-color: #f4f6f8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+">
+  <div style="
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    text-align: center;
+    width: 400px;
+  ">
+    <h2>🎓 Student Dropout Prediction</h2>
+    <p style="color:gray;">Model Accuracy: {{ accuracy }}</p>
+
+    <form method="POST">
+      {% csrf_token %}
+      <input type="number" name="attendance" placeholder="Attendance (%)" required
+             style="padding:10px; margin:10px; border-radius:6px; border:1px solid #ccc; width:80%;">
+      <input type="number" name="studyhours" placeholder="Study Hours per Week" required
+             style="padding:10px; margin:10px; border-radius:6px; border:1px solid #ccc; width:80%;">
+      <input type="number" name="parent" placeholder="Parental Support (1=Yes, 0=No)" required
+             style="padding:10px; margin:10px; border-radius:6px; border:1px solid #ccc; width:80%;">
+      <input type="number" name="grade" placeholder="Previous Grade (%)" required
+             style="padding:10px; margin:10px; border-radius:6px; border:1px solid #ccc; width:80%;">
+
+      <button type="submit"
+              style="padding:10px; margin:10px; border-radius:6px; border:none; width:80%; background-color:#007bff; color:white; cursor:pointer;"
+              onmouseover="this.style.backgroundColor='#0056b3'"
+              onmouseout="this.style.backgroundColor='#007bff'">
+        Predict
+      </button>
+    </form>
+
+    {% if result %}
+      <div style="margin-top:15px; font-weight:bold; color:#333;">
+        {{ result }}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
