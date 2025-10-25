@@ -15,6 +15,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from django.http import JsonResponse
 
 # 🔹 Authentication: Register
 def register(req):
@@ -304,13 +305,9 @@ def delete_student(request, id):
 # ==============================================================
 
 def courses_list(request):
-    courses = []
-    docs = db.collection("courses").stream()
-    for d in docs:
-        c = d.to_dict()
-        c["id"] = d.id
-        courses.append(c)
-    return render(request, "myapp/courses_list.html", {"courses": courses})
+    # Render a completely blank black page
+    return render(request, "myapp/courses_list.html")
+
 
 
 def courses_add(request):
@@ -343,3 +340,27 @@ def courses_edit(request, doc_id):
     course = doc.to_dict()
     course["id"] = doc.id
     return render(request, "myapp/courses_form.html", {"action": "Edit", "course": course})
+
+def dashboard_home(request):
+    email = request.session.get("email")
+    if not email:
+        return redirect("log")
+    return render(request, "myapp/home.html", {"email": email})
+
+
+
+def get_counts(request):
+    students_ref = db.collection("students").stream()
+    student_count = sum(1 for _ in students_ref)
+
+    courses_ref = db.collection("courses").stream()
+    course_count = sum(1 for _ in courses_ref)
+
+    return JsonResponse({
+        "student_count": student_count,
+        "course_count": course_count,
+    })
+
+
+
+
