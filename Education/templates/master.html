@@ -70,16 +70,19 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-between px-lg-3" id="navbarCollapse">
-                <div class="navbar-nav mx-auto py-0">
-                    <a href="/i" class="nav-item nav-link active">Home</a>
-                    <a href="a" class="nav-item nav-link">About</a>
-                    <a href="c" class="nav-item nav-link">Courses</a>
-                    <a href="con" class="nav-item nav-link">Contact</a>
-                    <a href="new" class="nav-item nav-link">News</a>
-                    </div>
+              <div class="navbar-nav mx-auto py-0">
+    <a href="{% url 'index' %}" class="nav-item nav-link active">Home</a>
+    <a href="{% url 'about' %}" class="nav-item nav-link">About</a>
+    <a href="{% url 'course' %}" class="nav-item nav-link">Courses</a>
+    <a href="{% url 'con' %}" class="nav-item nav-link">Contact</a>
+    <a href="{% url 'blog_list' %}" class="nav-item nav-link">News</a>
+    <a href="{% url 'predict' %}" class="nav-item nav-link">Performance</a>
+    <a href="{% url 'dropout' %}" class="nav-item nav-link">Dropout</a>
+</div>
                 </div>
                 <a href="" class="btn btn-primary py-2 px-4 d-none d-lg-block">Join Us</a>
             </div>
+
         </nav>
     </div>
     <!-- Navbar End -->

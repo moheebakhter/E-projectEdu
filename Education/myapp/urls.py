@@ -10,6 +10,8 @@ urlpatterns = [
     path("c", views.Course, name="course"),
     path("con", views.Contact, name="con"),
     path("new", views.blog_list, name="blog_list"),
+    path('predict/', views.predict_view, name='predict'),
+    path("dropout/", views.dropout_view, name="dropout"),
     path("logout", views.logout_view, name="logout"),
     path("", views.home, name="home"),
 
