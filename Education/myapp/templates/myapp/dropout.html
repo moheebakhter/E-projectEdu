@@ -1,48 +1,41 @@
-{% extends "master.html" %}
+{% extends "base.html" %}
+{% block title %}Dropout Prediction{% endblock %}
 
-{% block abc %}
-<div style="
-  font-family: Arial, sans-serif;
-  background-color: #f4f6f8;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-">
-  <div style="
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    text-align: center;
-    width: 400px;
-  ">
-    <h2>🎓 Student Dropout Prediction</h2>
-    <p style="color:gray;">Model Accuracy: {{ accuracy }}</p>
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="height: 90vh;">
+  <div class="card shadow-lg p-4" style="max-width: 420px; width: 100%; border-radius: 10px;">
+    <h3 class="text-center mb-3 fw-bold">🎓 Dropout Prediction</h3>
+    <p class="text-center text-muted mb-4">Enter student details to predict dropout chance.</p>
 
     <form method="POST">
       {% csrf_token %}
-      <input type="number" name="attendance" placeholder="Attendance (%)" required
-             style="padding:10px; margin:10px; border-radius:6px; border:1px solid #ccc; width:80%;">
-      <input type="number" name="studyhours" placeholder="Study Hours per Week" required
-             style="padding:10px; margin:10px; border-radius:6px; border:1px solid #ccc; width:80%;">
-      <input type="number" name="parent" placeholder="Parental Support (1=Yes, 0=No)" required
-             style="padding:10px; margin:10px; border-radius:6px; border:1px solid #ccc; width:80%;">
-      <input type="number" name="grade" placeholder="Previous Grade (%)" required
-             style="padding:10px; margin:10px; border-radius:6px; border:1px solid #ccc; width:80%;">
+      <div class="mb-3">
+        <input type="number" id="attendance" name="attendance" step="0.1" min="0" max="100"
+               class="form-control text-center" placeholder="Attendance (%)" required>
+      </div>
 
-      <button type="submit"
-              style="padding:10px; margin:10px; border-radius:6px; border:none; width:80%; background-color:#007bff; color:white; cursor:pointer;"
-              onmouseover="this.style.backgroundColor='#0056b3'"
-              onmouseout="this.style.backgroundColor='#007bff'">
-        Predict
-      </button>
+      <div class="mb-3">
+        <input type="number" id="studyhours" name="studyhours" step="0.1" min="0"
+               class="form-control text-center" placeholder="Study Hours per Day" required>
+      </div>
+
+      <div class="mb-3">
+        <input type="number" id="parent" name="parent" step="1" min="1" max="5"
+               class="form-control text-center" placeholder="Parental Support (1–5)" required>
+      </div>
+
+      <div class="mb-3">
+        <input type="number" id="grade" name="grade" step="0.1" min="0" max="100"
+               class="form-control text-center" placeholder="Previous Grade (0–100)" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 fw-bold">Predict</button>
     </form>
 
     {% if result %}
-      <div style="margin-top:15px; font-weight:bold; color:#333;">
-        {{ result }}
+      <div class="alert alert-info text-center mt-4">
+        <strong>{{ result }}</strong><br>
+        <small class="text-muted">Model Accuracy: {{ accuracy }}%</small>
       </div>
     {% endif %}
   </div>

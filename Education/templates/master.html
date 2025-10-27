@@ -1,190 +1,150 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <title>Edukate - Online Education Website Template</title>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="Free HTML Templates" name="keywords">
-    <meta content="Free HTML Templates" name="description">
+  <meta charset="utf-8">
+  <title>Edukate - Online Education Website Template</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <link href="{% static 'img/favicon.ico' %}" rel="icon">
 
-    <!-- Favicon -->
-    <link href="/static/img/favicon.ico" rel="icon">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
 
-    <!-- Google Web Fonts -->
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
 
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+  <!-- Bootstrap & Libs -->
+  <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/style.css' %}" rel="stylesheet">
 
-    <!-- Libraries Stylesheet -->
-    <link href="/static/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+  <style>
+    /* ✅ Auto-hide flash messages */
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2000;
+      min-width: 250px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .alert.fade-out {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
 
-    <!-- Customized Bootstrap Stylesheet -->
-    <link href="/static/css/style.css" rel="stylesheet">
+    /* ✅ Green tick animation */
+    .checkmark {
+      display: inline-block;
+      transform: rotate(45deg);
+      height: 20px;
+      width: 10px;
+      border-bottom: 3px solid #fff;
+      border-right: 3px solid #fff;
+      margin-right: 8px;
+    }
+  </style>
 </head>
 
 <body>
-    <!-- Topbar Start -->
-    <div class="container-fluid bg-dark">
-        <div class="row py-2 px-lg-5">
-            <div class="col-lg-6 text-center text-lg-left mb-2 mb-lg-0">
-                <div class="d-inline-flex align-items-center text-white">
-                    <small><i class="fa fa-phone-alt mr-2"></i>+012 345 6789</small>
-                    <small class="px-3">|</small>
-                    <small><i class="fa fa-envelope mr-2"></i>info@example.com</small>
-                </div>
-            </div>
-            <div class="col-lg-6 text-center text-lg-right">
-                <div class="d-inline-flex align-items-center">
-                    <a class="text-white px-2" href="">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a class="text-white px-2" href="">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a class="text-white px-2" href="">
-                        <i class="fab fa-linkedin-in"></i>
-                    </a>
-                    <a class="text-white px-2" href="">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a class="text-white pl-2" href="">
-                        <i class="fab fa-youtube"></i>
-                    </a>
-                </div>
-            </div>
+  <!-- ✅ Topbar -->
+  <div class="container-fluid bg-dark">
+    <div class="row py-2 px-lg-5">
+      <div class="col-lg-6 text-center text-lg-left mb-2 mb-lg-0">
+        <div class="d-inline-flex align-items-center text-white">
+          <small><i class="fa fa-phone-alt mr-2"></i>+012 345 6789</small>
+          <small class="px-3">|</small>
+          <small><i class="fa fa-envelope mr-2"></i>info@example.com</small>
         </div>
+      </div>
+      <div class="col-lg-6 text-center text-lg-right">
+        <div class="d-inline-flex align-items-center">
+          <a class="text-white px-2" href="#"><i class="fab fa-facebook-f"></i></a>
+          <a class="text-white px-2" href="#"><i class="fab fa-twitter"></i></a>
+          <a class="text-white px-2" href="#"><i class="fab fa-linkedin-in"></i></a>
+          <a class="text-white px-2" href="#"><i class="fab fa-instagram"></i></a>
+          <a class="text-white pl-2" href="#"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
     </div>
-    <!-- Topbar End -->
+  </div>
 
+  <!-- ✅ Navbar -->
+  <div class="container-fluid p-0">
+    <nav class="navbar navbar-expand-lg bg-white navbar-light py-3 py-lg-0 px-lg-5">
+      <a href="{% url 'index' %}" class="navbar-brand ml-lg-3">
+        <h1 class="m-0 text-uppercase text-primary"><i class="fa fa-book-reader mr-3"></i>Edukate</h1>
+      </a>
+      <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-    <!-- Navbar Start -->
-    <div class="container-fluid p-0">
-        <nav class="navbar navbar-expand-lg bg-white navbar-light py-3 py-lg-0 px-lg-5">
-            <a href="i" class="navbar-brand ml-lg-3">
-                <h1 class="m-0 text-uppercase text-primary"><i class="fa fa-book-reader mr-3"></i>Edukate</h1>
+      <div class="collapse navbar-collapse justify-content-between px-lg-3" id="navbarCollapse">
+        <div class="navbar-nav mx-auto py-0">
+          <a href="{% url 'index' %}" class="nav-item nav-link active">Home</a>
+          <a href="{% url 'about' %}" class="nav-item nav-link">About</a>
+          <a href="{% url 'course' %}" class="nav-item nav-link">Courses</a>
+          <a href="{% url 'con' %}" class="nav-item nav-link">Contact</a>
+          <a href="{% url 'blog_list' %}" class="nav-item nav-link">News</a>
+          <a href="{% url 'predict' %}" class="nav-item nav-link">Performance</a>
+          <a href="{% url 'dropout' %}" class="nav-item nav-link">Dropout</a>
+        </div>
+
+        <!-- ✅ Auth Buttons -->
+        <div class="navbar-nav ms-auto py-0">
+          {% if request.session.email %}
+            <a href="{% url 'logout' %}" class="nav-item nav-link text-danger fw-bold">
+              <i class="fa fa-sign-out-alt me-1"></i> Logout
             </a>
-            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-between px-lg-3" id="navbarCollapse">
-              <div class="navbar-nav mx-auto py-0">
-    <a href="{% url 'index' %}" class="nav-item nav-link active">Home</a>
-    <a href="{% url 'about' %}" class="nav-item nav-link">About</a>
-    <a href="{% url 'course' %}" class="nav-item nav-link">Courses</a>
-    <a href="{% url 'con' %}" class="nav-item nav-link">Contact</a>
-    <a href="{% url 'blog_list' %}" class="nav-item nav-link">News</a>
-    <a href="{% url 'predict' %}" class="nav-item nav-link">Performance</a>
-    <a href="{% url 'dropout' %}" class="nav-item nav-link">Dropout</a>
-</div>
-                </div>
-                <a href="" class="btn btn-primary py-2 px-4 d-none d-lg-block">Join Us</a>
-            </div>
-
-        </nav>
-    </div>
-    <!-- Navbar End -->
-
-
-
-{% block abc%}
-
-{% endblock %}
-
-
-
-<!-- Footer Start -->
-    <div class="container-fluid position-relative overlay-top bg-dark text-white-50 py-5" style="margin-top: 90px;">
-        <div class="container mt-5 pt-5">
-            <div class="row">
-                <div class="col-md-6 mb-5">
-                    <a href="" class="navbar-brand">
-                        <h1 class="mt-n2 text-uppercase text-white"><i class="fa fa-book-reader mr-3"></i>Edukate</h1>
-                    </a>
-                    <p class="m-0">Accusam nonumy clita sed rebum kasd eirmod elitr. Ipsum ea lorem at et diam est, tempor rebum ipsum sit ea tempor stet et consetetur dolores. Justo stet diam ipsum lorem vero clita diam</p>
-                </div>
-                <div class="col-md-6 mb-5">
-                    <h3 class="text-white mb-4">Newsletter</h3>
-                    <div class="w-100">
-                        <div class="input-group">
-                            <input type="text" class="form-control border-light" style="padding: 30px;" placeholder="Your Email Address">
-                            <div class="input-group-append">
-                                <button class="btn btn-primary px-4">Sign Up</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4 mb-5">
-                    <h3 class="text-white mb-4">Get In Touch</h3>
-                    <p><i class="fa fa-map-marker-alt mr-2"></i>123 Street, New York, USA</p>
-                    <p><i class="fa fa-phone-alt mr-2"></i>+012 345 67890</p>
-                    <p><i class="fa fa-envelope mr-2"></i>info@example.com</p>
-                    <div class="d-flex justify-content-start mt-4">
-                        <a class="text-white mr-4" href="#"><i class="fab fa-2x fa-twitter"></i></a>
-                        <a class="text-white mr-4" href="#"><i class="fab fa-2x fa-facebook-f"></i></a>
-                        <a class="text-white mr-4" href="#"><i class="fab fa-2x fa-linkedin-in"></i></a>
-                        <a class="text-white" href="#"><i class="fab fa-2x fa-instagram"></i></a>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-5">
-                    <h3 class="text-white mb-4">Our Courses</h3>
-                    <div class="d-flex flex-column justify-content-start">
-                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Web Design</a>
-                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Apps Design</a>
-                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Marketing</a>
-                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Research</a>
-                        <a class="text-white-50" href="#"><i class="fa fa-angle-right mr-2"></i>SEO</a>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-5">
-                    <h3 class="text-white mb-4">Quick Links</h3>
-                    <div class="d-flex flex-column justify-content-start">
-                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Privacy Policy</a>
-                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Terms & Condition</a>
-                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Regular FAQs</a>
-                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Help & Support</a>
-                        <a class="text-white-50" href="con"><i class="fa fa-angle-right mr-2"></i>Contact</a>
-                    </div>
-                </div>
-            </div>
+          {% else %}
+            <a href="{% url 'log' %}" class="nav-item nav-link"><i class="fa fa-sign-in-alt me-1"></i> Login</a>
+            <a href="{% url 'reg' %}" class="nav-item nav-link"><i class="fa fa-user-plus me-1"></i> Register</a>
+          {% endif %}
         </div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ✅ Messages -->
+  {% if messages %}
+  <div class="messages">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">
+        {% if message.tags == 'success' %}
+          <span class="checkmark"></span>
+        {% elif message.tags == 'error' %}
+          <i class="fa fa-times-circle mr-2"></i>
+        {% endif %}
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ✅ Page Content -->
+  {% block abc %}{% endblock %}
+
+  <!-- ✅ Footer -->
+  <div class="container-fluid bg-dark text-white-50 border-top py-4">
+    <div class="container text-center">
+      <p class="m-0">Copyright &copy;
+        <a class="text-white" href="#">Edukate</a>. All Rights Reserved.
+      </p>
     </div>
-    <div class="container-fluid bg-dark text-white-50 border-top py-4" style="border-color: rgba(256, 256, 256, .1) !important;">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6 text-center text-md-left mb-3 mb-md-0">
-                    <p class="m-0">Copyright &copy; <a class="text-white" href="#">Your Site Name</a>. All Rights Reserved.
-                    </p>
-                </div>
-                <div class="col-md-6 text-center text-md-right">
-                    <p class="m-0">Designed by <a class="text-white" href="https://htmlcodex.com">HTML Codex</a> Distributed by <a href="https://themewagon.com" target="_blank">ThemeWagon</a></p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Footer End -->
+  </div>
 
-
-    <!-- Back to Top -->
-    <a href="#" class="btn btn-lg btn-primary rounded-0 btn-lg-square back-to-top"><i class="fa fa-angle-double-up"></i></a>
-
-
-    <!-- JavaScript Libraries -->
-    <script src="/static/https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="/static/https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/lib/easing/easing.min.js"></script>
-    <script src="/static/lib/waypoints/waypoints.min.js"></script>
-    <script src="/static/lib/counterup/counterup.min.js"></script>
-    <script src="/static/lib/owlcarousel/owl.carousel.min.js"></script>
-
-    <!-- Template Javascript -->
-    <script src="/static/js/main.js"></script>
-
-
+  <!-- ✅ Scripts -->
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // 🔄 Auto-hide messages after 3 seconds
+    setTimeout(() => {
+      document.querySelectorAll('.alert').forEach(alert => {
+        alert.classList.add('fade-out');
+        setTimeout(() => alert.remove(), 600);
+      });
+    }, 3000);
+  </script>
 </body>
-
 </html>

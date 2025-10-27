@@ -1,40 +1,33 @@
-{% extends "master.html" %}
+{% extends "base.html" %}
+{% block title %}Predict Writing Score{% endblock %}
 
-{% block abc %}
-<!-- 👇 Inline styling directly in body -->
-<div style="
-  font-family: Arial, sans-serif;
-  background-color: #f4f6f8;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-">
-  <div style="
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    text-align: center;
-    width: 400px;
-  ">
-    <h2>Predict Writing Score</h2>
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="height: 80vh;">
+  <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%; border-radius: 10px;">
+    <h3 class="text-center mb-4 fw-bold">Predict Writing Score</h3>
+
     <form method="POST">
       {% csrf_token %}
-      <input type="text" name="hours" placeholder="Enter Weekly Study Hours" required
-             style="padding:10px; margin:10px; border-radius:6px; border:1px solid #ccc; width:80%;">
-      <button type="submit"
-              style="padding:10px; margin:10px; border-radius:6px; border:none; width:80%; background-color:#007bff; color:white; cursor:pointer;"
-              onmouseover="this.style.backgroundColor='#0056b3'"
-              onmouseout="this.style.backgroundColor='#007bff'">
+      <div class="mb-3">
+        <input
+          type="number"
+          step="0.1"
+          min="0"
+          name="hours"
+          class="form-control text-center"
+          placeholder="Enter Weekly Study Hours"
+          required
+        >
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 fw-bold">
         Predict
       </button>
     </form>
 
     {% if result %}
-      <div style="margin-top:15px; font-weight:bold; color:#333;">
-        Predicted Score: {{ result }}
+      <div class="alert alert-success text-center mt-4">
+        🎯 Predicted Writing Score: <strong>{{ result }}</strong>
       </div>
     {% endif %}
   </div>

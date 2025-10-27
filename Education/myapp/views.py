@@ -16,6 +16,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from django.http import JsonResponse
+from sklearn.ensemble import RandomForestClassifier
+
 
 # 🔹 Authentication: Register
 def register(req):
@@ -142,50 +144,93 @@ def predict_view(request):
         prediction = model.predict([[hours]])
         result = round(prediction[0], 2)
 
+        # ✅ Save prediction result to Firebase
+        try:
+            db.collection("predictions").add({
+                "hours": hours,
+                "predicted_score": result,
+                "user_email": request.session.get("email", "guest"),
+                "timestamp": datetime.datetime.now().isoformat()
+            })
+        except Exception as e:
+            print(f"⚠️ Firebase Save Error: {e}")
+
     return render(request, "myapp/predict.html", {"result": result})
 
-
-# 🔹 Train model once when the server starts
-df = pd.read_csv("student_dropout_dataset.csv")
-
-x = df[["Attendance", "StudyHours", "ParentalSupport", "PreviousGrade"]]
-y = df["Dropout"]
-
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
-
-model = LogisticRegression()
-model.fit(x_train, y_train)
-
-accuracy = round(accuracy_score(y_test, model.predict(x_test)), 3)
-print(f"✅ Dropout Model trained (Accuracy: {accuracy})")
 
 
 # 🔹 Django view for form and prediction
 def dropout_view(request):
     result = None
+    accuracy = None
+
+    # ✅ Correct CSV path (based on your project)
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    csv_path = os.path.join(base_dir, "student_dropout_dataset.csv")
+
+    # ✅ Load dataset
+    mydata = pd.read_csv(csv_path)
+
+    # ✅ Adjust columns to match your CSV (check names carefully!)
+    X = mydata[["Attendance", "StudyHours", "ParentalSupport", "PreviousGrade"]]
+    y = mydata["Dropout"]
+
+    # ✅ Split & train model
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    model = RandomForestClassifier()
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    accuracy = round(accuracy_score(y_test, y_pred) * 100, 2)
+
+    # ✅ Handle POST request for prediction
     if request.method == "POST":
         attendance = float(request.POST.get("attendance"))
         studyhours = float(request.POST.get("studyhours"))
-        parent = int(request.POST.get("parent"))
+        parent = float(request.POST.get("parent"))
         grade = float(request.POST.get("grade"))
 
-        # Prediction
+        # Make prediction
         user_data = [[attendance, studyhours, parent, grade]]
         prediction = model.predict(user_data)[0]
 
         if prediction == 1:
-            result = "⚠️ High Chance of dropout"
+            result = "⚠️ High Chance of Dropout"
         else:
-            result = "✅ Great! The student is on the right track and likely to complete studies"
+            result = "✅ Student likely to continue studies"
 
+        # ✅ Save to Firebase
+        try:
+            db.collection("dropout_predictions").add({
+                "attendance": attendance,
+                "study_hours": studyhours,
+                "parental_support": parent,
+                "previous_grade": grade,
+                "prediction": result,
+                "accuracy": accuracy,
+                "user_email": request.session.get("email", "guest"),
+                "timestamp": datetime.datetime.now().isoformat()
+            })
+        except Exception as e:
+            print(f"⚠️ Firebase Save Error: {e}")
+
+    # ✅ Render page
     return render(request, "myapp/dropout.html", {"result": result, "accuracy": accuracy})
 
-# 🔹 Logout
-def logout_view(request):
-    logout(request)
-    request.session.flush()
-    return redirect("log")
 
+# 🔹 Logout
+
+def logout_view(request):
+    # Check if user is logged in
+    if request.session.get("email"):
+        # Clear session
+        request.session.flush()
+        # Add success message
+        messages.success(request, "Logout successful!")
+    else:
+        messages.warning(request, "You are not logged in.")
+
+    # Redirect to login page
+    return redirect('log')
 
 # ==============================================================
 # ✅ STUDENTS CRUD (With Email Notification)
