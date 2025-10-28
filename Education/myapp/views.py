@@ -1,5 +1,7 @@
 import datetime
 import requests
+from collections import defaultdict
+from statistics import mean
 import os
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -23,6 +25,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from django.http import JsonResponse
 from sklearn.ensemble import RandomForestClassifier
+from google.cloud import firestore  # add this import at the top
+
 
 
 # 🔹 Authentication: Register
@@ -253,8 +257,6 @@ def students_list(request):
 
 
 
-
-
 def students_add(request):
     if request.method == "POST":
         name = request.POST.get("name")
@@ -417,11 +419,56 @@ def courses_edit(request, doc_id):
     course["id"] = doc.id
     return render(request, "myapp/courses_form.html", {"action": "Edit", "course": course})
 
+
 def dashboard_home(request):
     email = request.session.get("email")
     if not email:
         return redirect("log")
-    return render(request, "myapp/home.html", {"email": email})
+
+    # ✅ Total Students Count
+    students_ref = db.collection('students').get()
+    total_students = len(students_ref)
+
+    # ✅ Fetch Predictions (latest first)
+    predictions_ref = db.collection('predictions').order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
+
+    predictions = []
+    for i, doc in enumerate(predictions_ref, start=1):
+        data = doc.to_dict()
+        predictions.append({
+            'id': i,
+            'user_email': data.get('user_email', ''),
+            'hours': data.get('hours', ''),
+            'predicted_score': data.get('predicted_score', ''),
+            'timestamp': data.get('timestamp', ''),
+        })
+
+    return render(request, "myapp/home.html", {
+        'student_count': total_students,
+        'predictions': predictions,
+    })
+
+def students_dashboard(request):
+    email = request.session.get("email")
+    if not email:
+        return redirect("log")
+
+    # ✅ Fetch all students
+    students_ref = db.collection("students").stream()
+    students = []
+
+    for i, doc in enumerate(students_ref, start=1):
+        data = doc.to_dict()
+        students.append({
+            "id": i,
+            "name": data.get("name", ""),
+            "email": data.get("email", ""),
+            "grade": data.get("grade", ""),
+            "contact": data.get("contact", ""),
+            "enrollment": data.get("enrollment", ""),
+        })
+
+    return render(request, "myapp/students_dashboard.html", {"students": students})
 
 
 
@@ -473,3 +520,72 @@ def student_profile(request):
 
 
 
+def predict_student_all(request):
+    # ✅ Fetch Predictions (latest first)
+    predictions_ref = db.collection('predictions') \
+        .order_by('timestamp', direction=firestore.Query.DESCENDING) \
+        .stream()
+
+    # 🔹 Group by user_email
+    grouped = defaultdict(list)
+
+    for doc in predictions_ref:
+        data = doc.to_dict()
+        email = data.get('user_email', '').strip().lower()
+        if not email:
+            continue
+        grouped[email].append({
+            'hours': float(data.get('hours', 0)),
+            'predicted_score': float(data.get('predicted_score', 0)),
+            'timestamp': data.get('timestamp', '')
+        })
+
+    # 🔹 Calculate averages per email
+    predictions = []
+    for i, (email, entries) in enumerate(grouped.items(), start=1):
+        avg_hours = mean(e['hours'] for e in entries)
+        avg_score = mean(e['predicted_score'] for e in entries)
+
+        # Get latest timestamp for that email
+        latest_time = max(e['timestamp'] for e in entries if e['timestamp'])
+
+        predictions.append({
+            'id': i,
+            'user_email': email,
+            'hours': round(avg_hours, 2),
+            'predicted_score': round(avg_score, 2),
+            'timestamp': latest_time,
+        })
+
+    # 🔹 Sort by timestamp (newest first)
+    predictions.sort(key=lambda x: x['timestamp'], reverse=True)
+
+    return render(request, "myapp/showpredict.html", {
+        'predictions': predictions,
+    })
+
+
+def dropout_all(request):
+    # ✅ Fetch all dropout prediction records (latest first)
+    dropout_ref = db.collection('dropout_predictions') \
+        .order_by('timestamp', direction=firestore.Query.DESCENDING) \
+        .stream()
+
+    dropout_data = []
+    for i, doc in enumerate(dropout_ref, start=1):
+        data = doc.to_dict()
+        dropout_data.append({
+            'id': i,
+            'user_email': data.get('user_email', ''),
+            'attendance': data.get('attendance', ''),
+            'study_hours': data.get('study_hours', ''),
+            'parental_support': data.get('parental_support', ''),
+            'previous_grade': data.get('previous_grade', ''),
+            'prediction': data.get('prediction', ''),
+            'accuracy': data.get('accuracy', ''),
+            'timestamp': data.get('timestamp', ''),
+        })
+
+    return render(request, "myapp/dropoutpredictionfetchall.html", {
+        'dropout_data': dropout_data,
+    })

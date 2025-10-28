@@ -15,7 +15,12 @@ urlpatterns = [
     path('predict/', views.predict_view, name='predict'),
     path("dropout/", views.dropout_view, name="dropout"),
     path("logout/", views.logout_view, name="logout"),
+
     path('profile/', views.student_profile, name='profile'),
+
+    path("fetchallpredict/", views.predict_student_all, name="predict_all"),
+    path("fetchalldropout/", views.dropout_all, name="fetchalldropout"),
+
 
     # --- Students Management ---
     path("students/add/", views.students_add, name="students_add"),
@@ -28,6 +33,9 @@ urlpatterns = [
     path("courses/edit/<str:doc_id>/", views.courses_edit, name="courses_edit"),
     path("courses/", views.courses_list, name="courses_list"),
     path("api/get_counts/", views.get_counts, name="get_counts"),
+    path("students-dashboard/", views.students_dashboard, name="students_dashboard"),
+
+
 
 
 ]
