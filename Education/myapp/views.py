@@ -9,6 +9,12 @@ from django.contrib.auth import logout
 from django.views.decorators.cache import never_cache
 from django.http import HttpResponse
 from Education.firebase_config import db
+from firebase_admin import auth
+
+from django.core.mail import send_mail
+from django.contrib import messages
+from django.conf import settings
+import datetime
 from .scrapper import scrape_propakistani_blogs
 import pandas as pd
 from sklearn.linear_model import LinearRegression
@@ -246,10 +252,8 @@ def students_list(request):
     return render(request, "myapp/students_list.html", {"students": students})
 
 
-from django.core.mail import send_mail
-from django.contrib import messages
-from django.conf import settings
-import datetime
+
+
 
 def students_add(request):
     if request.method == "POST":
@@ -259,11 +263,20 @@ def students_add(request):
         password = request.POST.get("password")
         contact = request.POST.get("contact")
 
+        # Validation
+        if not all([name, email, grade, password, contact]):
+            messages.error(request, "All fields are required!")
+            return redirect("students_add")
+
+        if len(password) < 6:
+            messages.error(request, "Password must be at least 6 characters long.")
+            return redirect("students_add")
+
         # Generate unique enrollment number
         today = datetime.datetime.now().strftime("%Y%m%d")
         enrollment = f"ENR-{today}-{int(datetime.datetime.now().timestamp()) % 1000:03d}"
 
-        # Save student data to Firebase
+        # Prepare student data for Firestore
         data = {
             "name": name,
             "email": email,
@@ -274,9 +287,22 @@ def students_add(request):
         }
 
         try:
+            # 1️⃣ Add to Firestore
             db.collection("students").add(data)
 
-            # Send Email Notification
+            # 2️⃣ Create Firebase Authentication user
+            try:
+                auth.create_user(
+                    email=email,
+                    password=password,
+                    display_name=name,
+                )
+            except auth.EmailAlreadyExistsError:
+                messages.warning(request, f"{email} already exists in Firebase Auth.")
+            except Exception as e:
+                messages.error(request, f"Firebase Auth error: {e}")
+
+            # 3️⃣ Send Email Notification
             subject = "Welcome to Education System 🎓"
             message = f"""
 Dear {name},
@@ -294,21 +320,26 @@ Please keep this information safe and do not share your password with anyone.
 Best regards,
 Education System Admin
 """
-            send_mail(
-                subject=subject,
-                message=message,
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[email],
-                fail_silently=False,
-            )
+            try:
+                send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                messages.warning(request, f"Student added, but email not sent: {e}")
 
-            messages.success(request, f"✅ Student added and email sent to {email}")
+            messages.success(request, f"✅ Student added successfully!")
+
         except Exception as e:
-            messages.warning(request, f"Student added but email not sent: {e}")
+            messages.error(request, f"Error adding student: {e}")
 
-        return redirect("students_list")
+        return redirect("students_list")  # Replace with your list route
 
     return render(request, "myapp/add_edit_student.html", {"action": "Add"})
+
 
 
 
@@ -405,6 +436,39 @@ def get_counts(request):
         "student_count": student_count,
         "course_count": course_count,
     })
+def student_profile(request):
+    # Get the logged-in user's email from session
+    user_email = request.session.get("email")
+    print(user_email)
+    if not user_email:
+        messages.error(request, "You must log in first.")
+        return redirect("login")  # your login route name
+
+    # Fetch student data from Firestore
+    students_ref = db.collection("students")
+    query = students_ref.where("email", "==", user_email).limit(1).get()
+
+    if not query:
+        messages.error(request, "No student found with your email.")
+        return redirect("/login")  # homepage or wherever
+
+    student_doc = query[0]
+    student_data = student_doc.to_dict()
+
+    if request.method == "POST":
+        # Get updated data from form
+        name = request.POST.get("name")
+        password = request.POST.get("password")
+
+        # Update Firestore
+        student_doc.reference.update({
+            "name": name,
+            "password": password
+        })
+        messages.success(request, "Profile updated successfully!")
+        return redirect("profile")
+
+    return render(request, "myapp/profile.html", {"student": student_data})
 
 
 

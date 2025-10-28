@@ -15,6 +15,7 @@ urlpatterns = [
     path('predict/', views.predict_view, name='predict'),
     path("dropout/", views.dropout_view, name="dropout"),
     path("logout/", views.logout_view, name="logout"),
+    path('profile/', views.student_profile, name='profile'),
 
     # --- Students Management ---
     path("students/add/", views.students_add, name="students_add"),

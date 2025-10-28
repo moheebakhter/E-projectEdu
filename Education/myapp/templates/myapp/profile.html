@@ -1,0 +1,67 @@
+{% extends "master.html" %}
+
+{% block abc %}
+<div class="container m-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header text-center text-white py-3" style="background: linear-gradient(90deg, #4e54c8, #8f94fb); border-top-left-radius: .75rem; border-top-right-radius: .75rem;">
+          <h2 class="card-title mb-0">Student Profile</h2>
+        </div>
+        <div class="card-body p-4">
+
+          {% if messages %}
+            {% for m in messages %}
+              <div class="alert alert-info alert-dismissible fade show" role="alert">
+                {{ m }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <form method="POST">
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label for="email" class="form-label fw-semibold">Email</label>
+              <input type="email" class="form-control" id="email" name="email" value="{{ student.email }}" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label for="name" class="form-label fw-semibold">Name</label>
+              <input type="text" class="form-control" id="name" name="name" value="{{ student.name }}" required>
+            </div>
+
+            <div class="mb-3 position-relative">
+              <label for="password" class="form-label fw-semibold">Password</label>
+              <div class="input-group">
+                <input type="password" class="form-control" id="password" name="password" value="{{ student.password }}" required>
+                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 fw-bold">Update Profile</button>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const togglePassword = document.querySelector("#togglePassword");
+  const password = document.querySelector("#password");
+
+  togglePassword.addEventListener("click", function () {
+    // toggle the type attribute
+    const type = password.getAttribute("type") === "password" ? "text" : "password";
+    password.setAttribute("type", type);
+
+    // toggle the icon
+    this.innerHTML = type === "password" ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
+  });
+</script>
+{% endblock %}
