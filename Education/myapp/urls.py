@@ -3,17 +3,20 @@ from . import views
 
 urlpatterns = [
     # --- Main Pages ---
+    path("admin-login/", views.admin_login, name="admin_login"),
+    path("admin-logout/", views.admin_logout, name="admin_logout"),
     path("homes/", views.dashboard_home, name="dashboard_home"),
-    path("", views.home, name="home"),
+    # path("", views.home, name="home"),
     path("register/", views.register, name="reg"),
     path("login/", views.Login, name="log"),
-    path("index/", views.Index, name="index"),
+    path("", views.Index, name="index"),
     path("about/", views.About, name="about"),
     path("course/", views.Course, name="course"),
     path("contact/", views.Contact, name="con"),
     path("blog/", views.blog_list, name="blog_list"),
     path('predict/', views.predict_view, name='predict'),
     path("dropout/", views.dropout_view, name="dropout"),
+    path("predict-course/", views.predict_course, name="predict_course"),
     path("logout/", views.logout_view, name="logout"),
 
     path('profile/', views.student_profile, name='profile'),

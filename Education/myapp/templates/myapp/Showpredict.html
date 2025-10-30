@@ -8,14 +8,15 @@
 <body class="bg-gray-100 font-sans">
 
   <!-- Header -->
- <header class="bg-indigo-600 text-white py-4 shadow-md">
+  <header class="bg-indigo-600 text-white py-4 shadow-md">
     <div class="container mx-auto flex justify-between items-center px-6">
       <h1 class="text-2xl font-semibold">Education Admin Dashboard</h1>
       <nav>
         <a href="{% url 'dashboard_home' %}" class="px-3 hover:underline">Home</a>
         <a href="{% url 'students_list' %}" class="px-3 hover:underline">Students</a>
         <a href="{% url 'predict_all' %}" class="px-3 hover:underline">Predict Data</a>
-        <a href="{% url 'students_list' %}" class="px-3 hover:underline">DropOut Data</a>
+        <a href="{% url 'fetchalldropout' %}" class="px-3 hover:underline">DropOut Data</a>
+        <a href="{% url 'admin_logout' %}" class="px-3 bg-red-500 text-white rounded-lg px-4 py-2 hover:bg-red-600 transition">Logout</a>
       </nav>
     </div>
   </header>

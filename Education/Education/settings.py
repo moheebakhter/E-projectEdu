@@ -123,6 +123,9 @@ USE_TZ = True
 # -------------------------------------------------------
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 3600  # 1 hour (optional)
+
 
 # -------------------------------------------------------
 # Default primary key field

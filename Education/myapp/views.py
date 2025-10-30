@@ -26,7 +26,11 @@ from sklearn.metrics import accuracy_score
 from django.http import JsonResponse
 from sklearn.ensemble import RandomForestClassifier
 from google.cloud import firestore  # add this import at the top
-
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
+from django.views.decorators.cache import cache_control
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
 
 
 # 🔹 Authentication: Register
@@ -101,8 +105,77 @@ def home(request):
     return render(request, "myapp/index.html", {"email": email})
 
 
+
+
+
 def Index(request):
-    return render(request, "myapp/index.html")
+    # 🟦 Session se email lo
+    email = request.session.get('email')
+    print("Session Email:", email)
+
+    if not email:
+        return render(request, "myapp/index.html", {
+            "error": "⚠️ Session expired. Please login again."
+        })
+
+    # ==========================
+    # 🎯 PART 1 — Average Score (predictions collection)
+    # ==========================
+    predictions_ref = db.collection('predictions')
+    docs = predictions_ref.where('user_email', '==', email).stream()
+
+    scores = []
+    for doc in docs:
+        data = doc.to_dict()
+        scores.append(data.get('predicted_score', 0))
+
+    avg_score = round(sum(scores) / len(scores), 2) if scores else 0
+    print("Average Score:", avg_score)
+
+    # ==========================
+    # 🔥 PART 2 — Dropout Prediction (dropout_predictions collection)
+    # ==========================
+    dropout_ref = db.collection('dropout_predictions')
+    dropout_docs = dropout_ref.where('user_email', '==', email).stream()
+
+    dropout_count = 0
+    continue_count = 0
+
+    for doc in dropout_docs:
+        data = doc.to_dict()
+        prediction_text = str(data.get('prediction', '')).lower().strip()
+        print("Prediction Text:", prediction_text)
+
+        if "dropout" in prediction_text:
+            dropout_count += 1
+        elif "continue" in prediction_text:
+            continue_count += 1
+
+    print(f"Dropout Count: {dropout_count}, Continue Count: {continue_count}")
+
+    # 🧠 Final dropout result
+    if dropout_count > continue_count:
+        result_message = "⚠️ High Chance of Dropout"
+    elif continue_count > dropout_count:
+        result_message = "✅ Student likely to continue studies"
+    else:
+        result_message = "ℹ️ Not enough data for prediction"
+
+    # ==========================
+    # ✅ Return Data
+    # ==========================
+    context = {
+        "avg_score": avg_score,
+        "dropout_count": dropout_count,
+        "continue_count": continue_count,
+        "result_message": result_message
+    }
+
+    return render(request, "myapp/index.html", context)
+
+
+
+
 
 
 def About(request):
@@ -245,8 +318,10 @@ def logout_view(request):
 # ==============================================================
 # ✅ STUDENTS CRUD (With Email Notification)
 # ==============================================================
-
+@never_cache
 def students_list(request):
+    if not request.session.get('admin_logged_in'):
+        return redirect('admin_login')
     students = []
     docs = db.collection("students").stream()
     for d in docs:
@@ -419,11 +494,38 @@ def courses_edit(request, doc_id):
     course["id"] = doc.id
     return render(request, "myapp/courses_form.html", {"action": "Edit", "course": course})
 
+# ✅ Admin Login
+@never_cache
+def admin_login(request):
+    # Agar already login hai to dashboard bhej do
+    if request.session.get('admin_logged_in'):
+        return redirect('dashboard_home')
 
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        if username == "admin" and password == "admin123":
+            request.session['admin_logged_in'] = True
+            messages.success(request, "Admin login successful!")
+            return redirect('dashboard_home')
+        else:
+            messages.error(request, "Invalid username or password!")
+
+    response = render(request, 'myapp/admin_login.html')
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
+
+
+
+# ✅ Admin Dashboard (protected)
+@never_cache
 def dashboard_home(request):
-    email = request.session.get("email")
-    if not email:
-        return redirect("log")
+
+    if not request.session.get('admin_logged_in'):
+        return redirect('admin_login')
 
     # ✅ Total Students Count
     students_ref = db.collection('students').get()
@@ -448,10 +550,26 @@ def dashboard_home(request):
         'predictions': predictions,
     })
 
+
+# ✅ Admin Logout (safe)
+@never_cache
+def admin_logout(request):
+    if request.session.get('admin_logged_in'):
+        del request.session['admin_logged_in']
+
+    list(messages.get_messages(request))
+    messages.info(request, "Admin logged out successfully!")
+
+    response = redirect('admin_login')
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
+
 def students_dashboard(request):
     email = request.session.get("email")
     if not email:
-        return redirect("log")
+        return redirect('log')
 
     # ✅ Fetch all students
     students_ref = db.collection("students").stream()
@@ -519,9 +637,12 @@ def student_profile(request):
 
 
 
-
+@never_cache
 def predict_student_all(request):
     # ✅ Fetch Predictions (latest first)
+
+    if not request.session.get('admin_logged_in'):
+        return redirect('admin_login')
     predictions_ref = db.collection('predictions') \
         .order_by('timestamp', direction=firestore.Query.DESCENDING) \
         .stream()
@@ -564,9 +685,12 @@ def predict_student_all(request):
         'predictions': predictions,
     })
 
-
+@never_cache
 def dropout_all(request):
     # ✅ Fetch all dropout prediction records (latest first)
+
+    if not request.session.get('admin_logged_in'):
+        return redirect('admin_login')
     dropout_ref = db.collection('dropout_predictions') \
         .order_by('timestamp', direction=firestore.Query.DESCENDING) \
         .stream()
@@ -589,3 +713,33 @@ def dropout_all(request):
     return render(request, "myapp/dropoutpredictionfetchall.html", {
         'dropout_data': dropout_data,
     })
+
+
+def predict_course(request):
+    # Load dataset
+    df = pd.read_csv("course_suggestion_dataset.csv")
+
+    # Courses dropdown
+    courses = df["SuggestedCourse"].unique().tolist()
+
+    result = None
+    if request.method == "POST":
+        attendance = int(request.POST.get("attendance"))
+        percentage = int(request.POST.get("percentage"))
+        interest_tech = int(request.POST.get("interest_tech"))
+        interest_design = int(request.POST.get("interest_design"))
+        interest_management = int(request.POST.get("interest_management"))
+
+        # Model features and target
+        X = df[["Attendance", "Percentage", "Interest_Tech", "Interest_Design", "Interest_Management"]]
+        y = df["SuggestedCourse"]
+
+        # Train Decision Tree
+        model = DecisionTreeClassifier(random_state=42)
+        model.fit(X, y)
+
+        # Predict
+        new_data = [[attendance, percentage, interest_tech, interest_design, interest_management]]
+        result = model.predict(new_data)[0]
+
+    return render(request, "myapp/predict_course.html", {"courses": courses, "result": result})
